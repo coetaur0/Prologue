@@ -11,6 +11,11 @@ public sealed class Source
     public char this[int offset] => _contents[offset];
 
     /// <summary>
+    /// Returns the contents covered by some range in the source.
+    /// </summary>
+    public string this[Range range] => this[range.Start.Offset, range.End.Offset];
+
+    /// <summary>
     /// Returns the contents between two offsets in the source.
     /// </summary>
     private string this[int start, int end]
@@ -22,11 +27,6 @@ public sealed class Source
             return _contents.Substring(offset, length);
         }
     }
-
-    /// <summary>
-    /// Returns the contents covered by some range in the source.
-    /// </summary>
-    public string this[Range range] => this[range.Start.Offset, range.End.Offset];
 
     /// <summary>
     /// Returns the source's length.

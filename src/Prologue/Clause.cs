@@ -1,26 +1,12 @@
-﻿namespace Prologue;
+namespace Prologue;
 
 /// <summary>
 /// A Prolog definite clause.
 /// </summary>
-public sealed class Clause
+/// <param name="Head">The clause's head.</param>
+/// <param name="Body">The clause's body.</param>
+public record Clause(Structure Head, Structure[] Body)
 {
-    /// <summary>
-    /// The clause's head.
-    /// </summary>
-    public Structure Head { get; }
-
-    /// <summary>
-    /// The clause's body.
-    /// </summary>
-    public Structure[] Body { get; }
-
-    public Clause(Structure head, Structure[] body)
-    {
-        Head = head;
-        Body = body;
-    }
-
     /// <summary>
     /// Returns a string representation of the clause.
     /// </summary>

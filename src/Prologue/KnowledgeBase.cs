@@ -28,6 +28,6 @@ public sealed class KnowledgeBase
         if (_predicates.TryGetValue(clause.Head.Functor, out var clauses))
             clauses.Add(clause);
         else
-            _predicates[clause.Head.Functor] = new List<Clause>() { clause };
+            _predicates[clause.Head.Functor] = new List<Clause> { clause };
     }
 }

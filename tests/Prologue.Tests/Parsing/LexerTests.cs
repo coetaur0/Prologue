@@ -5,13 +5,19 @@ namespace Prologue.Tests.Parsing;
 public sealed class LexerTests
 {
     [Fact]
+    public void SkipComments()
+    {
+        Check("% This is a comment\n% And another one", new[] { (TokenKind.Eof, "") });
+    }
+
+    [Fact]
     public void LexSymbols()
     {
         Check("a b some_symbol someOtherSymbol",
             new[]
             {
-                (Token.Kind.Symbol, "a"), (Token.Kind.Symbol, "b"), (Token.Kind.Symbol, "some_symbol"),
-                (Token.Kind.Symbol, "someOtherSymbol"), (Token.Kind.Eof, "")
+                (TokenKind.Symbol, "a"), (TokenKind.Symbol, "b"), (TokenKind.Symbol, "some_symbol"),
+                (TokenKind.Symbol, "someOtherSymbol"), (TokenKind.Eof, "")
             });
     }
 
@@ -21,26 +27,26 @@ public sealed class LexerTests
         Check("X _1 Some_variable SomeOtherVariable",
             new[]
             {
-                (Token.Kind.Variable, "X"), (Token.Kind.Variable, "_1"), (Token.Kind.Variable, "Some_variable"),
-                (Token.Kind.Variable, "SomeOtherVariable"), (Token.Kind.Eof, "")
+                (TokenKind.Variable, "X"), (TokenKind.Variable, "_1"), (TokenKind.Variable, "Some_variable"),
+                (TokenKind.Variable, "SomeOtherVariable"), (TokenKind.Eof, "")
             });
     }
 
     [Fact]
     public void LexPunctuation()
     {
-        Check("() :- , .",
+        Check("() :- , . $",
             new[]
             {
-                (Token.Kind.LeftParen, "("), (Token.Kind.RightParen, ")"), (Token.Kind.Neck, ":-"),
-                (Token.Kind.Comma, ","), (Token.Kind.Period, "."), (Token.Kind.Eof, "")
+                (TokenKind.LeftParen, "("), (TokenKind.RightParen, ")"), (TokenKind.Neck, ":-"),
+                (TokenKind.Comma, ","), (TokenKind.Period, "."), (TokenKind.Unknown, "$"), (TokenKind.Eof, "")
             });
     }
 
     /// <summary>
-    /// Checks that the lexer produces tokens of some expected kinds with some expected values for a given input.
+    /// Checks that the lexer produces tokens with the expected kinds and values for some given input.
     /// </summary>
-    private void Check(string input, IEnumerable<(Token.Kind, string)> expected)
+    private void Check(string input, IEnumerable<(TokenKind, string)> expected)
     {
         var source = new Source(input);
         var lexer = new Lexer(source);
@@ -48,7 +54,7 @@ public sealed class LexerTests
         {
             var token = lexer.Next();
             Assert.NotNull(token);
-            Assert.Equal(kind, token.Type);
+            Assert.Equal(kind, token.Kind);
             Assert.Equal(value, source[token.Range]);
         }
     }

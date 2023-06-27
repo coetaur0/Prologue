@@ -59,45 +59,45 @@ public sealed class Lexer
         if (_offset >= _source.Length)
         {
             _depleted = true;
-            return MakeToken(Token.Kind.Eof);
+            return MakeToken(TokenKind.Eof);
         }
 
-        Token.Kind tokenType;
+        TokenKind tokenKind;
         switch (_source[_offset])
         {
             case var nextChar when char.IsLetter(nextChar) || nextChar == '_':
-                tokenType = char.IsLower(nextChar) ? Token.Kind.Symbol : Token.Kind.Variable;
+                tokenKind = char.IsLower(nextChar) ? TokenKind.Symbol : TokenKind.Variable;
                 Consume(c => char.IsLetter(c) || char.IsDigit(c) || c == '_');
                 break;
 
             case ':':
                 if (_offset + 1 < _source.Length && _source[_offset + 1] == '-')
                 {
-                    tokenType = Token.Kind.Neck;
+                    tokenKind = TokenKind.Neck;
                     Advance(2);
                 }
                 else
                 {
-                    tokenType = Token.Kind.Unknown;
+                    tokenKind = TokenKind.Unknown;
                     Advance(1);
                 }
 
                 break;
 
             default:
-                tokenType = _source[_offset] switch
+                tokenKind = _source[_offset] switch
                 {
-                    '(' => Token.Kind.LeftParen,
-                    ')' => Token.Kind.RightParen,
-                    ',' => Token.Kind.Comma,
-                    '.' => Token.Kind.Period,
-                    _ => Token.Kind.Unknown
+                    '(' => TokenKind.LeftParen,
+                    ')' => TokenKind.RightParen,
+                    ',' => TokenKind.Comma,
+                    '.' => TokenKind.Period,
+                    _ => TokenKind.Unknown
                 };
                 Advance(1);
                 break;
         }
 
-        return MakeToken(tokenType);
+        return MakeToken(tokenKind);
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public sealed class Lexer
     private void Advance(int offset)
     {
         for (var i = 0; i < offset; i++)
-            if (offset >= _source.Length)
+            if (_offset >= _source.Length)
                 return;
             else
             {
@@ -144,8 +144,8 @@ public sealed class Lexer
     /// <summary>
     /// Returns a new token of a given type.
     /// </summary>
-    private Token MakeToken(Token.Kind tokenType) =>
-        new Token(tokenType, new Range(_tokenStart, new Location(_line, _column, _offset)));
+    private Token MakeToken(TokenKind tokenKind) =>
+        new(tokenKind, new(_tokenStart, new(_line, _column, _offset)));
 
     /// <summary>
     /// Skips comments and whitespace in the source.
