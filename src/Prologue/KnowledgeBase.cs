@@ -5,6 +5,9 @@
 /// </summary>
 public sealed class KnowledgeBase
 {
+    /// <summary>
+    /// Returns the clauses associated with a given functor in the knowledge base.
+    /// </summary>
     public List<Clause> this[Functor functor] => _predicates[functor];
 
     /// <summary>

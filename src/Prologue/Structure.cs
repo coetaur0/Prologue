@@ -33,6 +33,6 @@ public sealed class Structure : Term
     public override string ToString()
     {
         var args = Arguments.Aggregate("", (args, term) => $"{args}{term}, ");
-        return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : $"{Functor.Symbol}";
+        return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : Functor.Symbol;
     }
 }
