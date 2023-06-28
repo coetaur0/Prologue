@@ -30,4 +30,17 @@ public sealed class KnowledgeBase
         else
             _predicates[clause.Head.Functor] = new List<Clause> { clause };
     }
+
+    /// <summary>
+    /// Returns a string representation of the knowledge base.
+    /// </summary>
+    public override string ToString()
+    {
+        var predicates = "";
+
+        foreach (var (_, clauses) in _predicates)
+            predicates = $"{predicates}{clauses.Aggregate("", (predicate, clause) => $"{predicate}{clause}\n")}\n";
+
+        return predicates;
+    }
 }

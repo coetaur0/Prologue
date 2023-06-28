@@ -13,34 +13,40 @@ public sealed class LexerTests
     [Fact]
     public void LexSymbols()
     {
-        Check("a b some_symbol someOtherSymbol",
+        Check(
+            "a b some_symbol someOtherSymbol",
             new[]
             {
                 (TokenKind.Symbol, "a"), (TokenKind.Symbol, "b"), (TokenKind.Symbol, "some_symbol"),
                 (TokenKind.Symbol, "someOtherSymbol"), (TokenKind.Eof, "")
-            });
+            }
+        );
     }
 
     [Fact]
     public void LexVariables()
     {
-        Check("X _1 Some_variable SomeOtherVariable",
+        Check(
+            "X _1 Some_variable SomeOtherVariable",
             new[]
             {
                 (TokenKind.Variable, "X"), (TokenKind.Variable, "_1"), (TokenKind.Variable, "Some_variable"),
                 (TokenKind.Variable, "SomeOtherVariable"), (TokenKind.Eof, "")
-            });
+            }
+        );
     }
 
     [Fact]
     public void LexPunctuation()
     {
-        Check("() :- , . $",
+        Check(
+            "() :- , . $",
             new[]
             {
                 (TokenKind.LeftParen, "("), (TokenKind.RightParen, ")"), (TokenKind.Neck, ":-"),
                 (TokenKind.Comma, ","), (TokenKind.Period, "."), (TokenKind.Unknown, "$"), (TokenKind.Eof, "")
-            });
+            }
+        );
     }
 
     /// <summary>

@@ -31,7 +31,7 @@ public sealed class Lexer
     private int _offset;
 
     /// <summary>
-    /// A boolean flag indicating if the lexer's stream of tokens is depleted (all tokens have been consumed).
+    /// Indicates if the lexer's token stream is depleted (all tokens in the source have been consumed).
     /// </summary>
     private bool _depleted;
 
@@ -101,6 +101,20 @@ public sealed class Lexer
     }
 
     /// <summary>
+    /// Skips comments and whitespace in the source.
+    /// </summary>
+    private void SkipNonTokens()
+    {
+        Consume(char.IsWhiteSpace);
+
+        while (_offset < _source.Length && _source[_offset] == '%')
+        {
+            Consume(c => c != '\n');
+            Consume(char.IsWhiteSpace);
+        }
+    }
+
+    /// <summary>
     /// Advances the lexer's position in the source by some offset.
     /// </summary>
     private void Advance(int offset)
@@ -146,18 +160,4 @@ public sealed class Lexer
     /// </summary>
     private Token MakeToken(TokenKind tokenKind) =>
         new(tokenKind, new(_tokenStart, new(_line, _column, _offset)));
-
-    /// <summary>
-    /// Skips comments and whitespace in the source.
-    /// </summary>
-    private void SkipNonTokens()
-    {
-        Consume(char.IsWhiteSpace);
-
-        while (_offset < _source.Length && _source[_offset] == '%')
-        {
-            Consume(c => c != '\n');
-            Consume(char.IsWhiteSpace);
-        }
-    }
 }

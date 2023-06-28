@@ -16,7 +16,7 @@ public sealed class Structure : Term
     public Term[] Arguments { get; }
 
     /// <summary>
-    /// Indicates whether the structure is a ground term or not.
+    /// Indicates if the structure is ground or not.
     /// </summary>
     public bool Ground { get; }
 
