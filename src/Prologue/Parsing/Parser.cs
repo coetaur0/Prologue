@@ -65,7 +65,7 @@ public sealed class Parser
     public (Query, List<Diagnostic>) ParseQuery()
     {
         var goals = new List<Structure>();
-        ParseList(ref goals, ParseStructure, TokenKind.Period);
+        ParseTermList(goals, ParseStructure, new Dictionary<string, Variable>(), TokenKind.Period);
 
         Consume(TokenKind.Period, "expect a '.' at the end of a query");
 
@@ -77,7 +77,9 @@ public sealed class Parser
     /// </summary>
     private Clause? ParseClause()
     {
-        var head = ParseStructure();
+        var variables = new Dictionary<string, Variable>();
+
+        var head = ParseStructure(variables);
         if (head is null)
             return null;
 
@@ -85,7 +87,7 @@ public sealed class Parser
         if (_nextToken.Kind == TokenKind.Neck)
         {
             Advance();
-            ParseList(ref body, ParseStructure, TokenKind.Period);
+            ParseTermList(body, ParseStructure, variables, TokenKind.Period);
         }
 
         Consume(TokenKind.Period, "expect a '.' at the end of a clause");
@@ -96,15 +98,15 @@ public sealed class Parser
     /// <summary>
     /// Parses a Prolog term.
     /// </summary>
-    private Term? ParseTerm()
+    private Term? ParseTerm(IDictionary<string, Variable> variables)
     {
         switch (_nextToken.Kind)
         {
             case TokenKind.Symbol:
-                return ParseStructure();
+                return ParseStructure(variables);
 
             case TokenKind.Variable:
-                return ParseVariable();
+                return ParseVariable(variables);
 
             default:
                 EmitDiagnostic("expect a Prolog term", _nextToken.Range);
@@ -115,43 +117,57 @@ public sealed class Parser
     /// <summary>
     /// Parses a Prolog structure.
     /// </summary>
-    private Structure? ParseStructure()
+    private Structure? ParseStructure(IDictionary<string, Variable> variables)
     {
-        var symbol = Consume(TokenKind.Symbol, "expect a symbol");
-        if (symbol is null)
+        var symbolToken = Consume(TokenKind.Symbol, "expect a symbol");
+        if (symbolToken is null)
             return null;
 
         var arguments = new List<Term>();
         if (_nextToken.Kind == TokenKind.LeftParen)
         {
             Advance();
-            ParseList(ref arguments, ParseTerm, TokenKind.RightParen);
+            ParseTermList(arguments, ParseTerm, variables, TokenKind.RightParen);
             Consume(TokenKind.RightParen, "expect a ')' at the end of a structure's arguments list");
         }
 
-        return new Structure(_source[symbol.Range], arguments.ToArray());
+        return new Structure(_source[symbolToken.Range], arguments.ToArray());
     }
 
     /// <summary>
     /// Parses a Prolog variable.
     /// </summary>
-    private Variable? ParseVariable()
+    private Variable? ParseVariable(IDictionary<string, Variable> variables)
     {
-        var variable = Consume(TokenKind.Variable, "expect a variable");
-        return variable is null ? null : new Variable(_source[variable.Range]);
+        var variableToken = Consume(TokenKind.Variable, "expect a variable");
+        if (variableToken is null)
+            return null;
+
+        var variableName = _source[variableToken.Range];
+        if (variables.TryGetValue(variableName, out var variable))
+            return variable;
+
+        variable = new Variable(variableName);
+        variables.Add(variableName, variable);
+        return variable;
     }
 
     /// <summary>
-    /// Parses a comma separated list of elements ending with some specific terminator token and returns it.
+    /// Parses a comma separated list of terms ending with some specific terminator and returns it.
     /// </summary>
-    private void ParseList<T>(ref List<T> elements, Func<T?> parseFunction, TokenKind terminator)
+    private void ParseTermList<T>(
+        ICollection<T> terms,
+        Func<IDictionary<string, Variable>, T?> parseFunction,
+        IDictionary<string, Variable> variables,
+        TokenKind terminator
+    )
     {
         var syncTokens = new[] { TokenKind.Comma, terminator };
         while (_nextToken.Kind != terminator)
         {
-            var element = parseFunction();
-            if (element is not null)
-                elements.Add(element);
+            var term = parseFunction(variables);
+            if (term is not null)
+                terms.Add(term);
 
             Synchronize(syncTokens);
 
