@@ -3,7 +3,7 @@ namespace Prologue.Parsing;
 /// <summary>
 /// The kind of a lexical token.
 /// </summary>
-public enum TokenKind
+internal enum TokenKind
 {
     Symbol,
     Variable,
@@ -21,4 +21,4 @@ public enum TokenKind
 /// </summary>
 /// <param name="Kind">The token's kind.</param>
 /// <param name="Range">The source range covered by the token.</param>
-public sealed record Token(TokenKind Kind, Range Range);
+internal sealed record Token(TokenKind Kind, Range Range);

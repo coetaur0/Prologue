@@ -3,7 +3,7 @@ namespace Prologue.Resolution;
 /// <summary>
 /// A Prolog query solver.
 /// </summary>
-public sealed class Solver
+internal sealed class Solver
 {
     /// <summary>
     /// Performs unification on a pair of Prolog terms.

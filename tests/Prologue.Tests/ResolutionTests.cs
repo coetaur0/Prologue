@@ -1,11 +1,9 @@
-using Prologue.Resolution;
+namespace Prologue.Tests;
 
-namespace Prologue.Tests.Resolution;
-
-public class SolverTests
+public class ResolutionTests
 {
     [Fact]
-    public void SucceedUnification()
+    public void UnifyTerms()
     {
         var w = new Variable("W");
         var z = new Variable("Z");
@@ -27,8 +25,9 @@ public class SolverTests
             }
         );
 
-        var substitution = new Substitution();
-        Assert.True(Solver.Unify(lhs, rhs, substitution));
+        var substitution = lhs.Unify(rhs);
+
+        Assert.NotNull(substitution);
 
         Assert.Equal("f(a)", substitution[x]!.ToString());
         Assert.Equal("f(f(a))", substitution[y]!.ToString());
@@ -37,7 +36,7 @@ public class SolverTests
     }
 
     [Fact]
-    public void FailUnification()
+    public void FailToUnifyTerms()
     {
         var z = new Variable("Z");
         var lhs = new Structure(
@@ -52,7 +51,7 @@ public class SolverTests
             new Term[] { x, new Structure("h", new Term[] { new Structure("a", Array.Empty<Term>()), y }), x }
         );
 
-        var substitution = new Substitution();
-        Assert.False(Solver.Unify(lhs, rhs, substitution));
+        var substitution = lhs.Unify(rhs);
+        Assert.Null(substitution);
     }
 }

@@ -3,8 +3,13 @@ namespace Prologue.Parsing;
 /// <summary>
 /// A source of Prolog code.
 /// </summary>
-public sealed class Source
+internal sealed class Source
 {
+    /// <summary>
+    /// The source's path.
+    /// </summary>
+    public string Path { get; }
+
     /// <summary>
     /// Returns the character at some offset in the source's contents.
     /// </summary>
@@ -38,8 +43,9 @@ public sealed class Source
     /// </summary>
     private readonly string _contents;
 
-    public Source(string contents)
+    public Source(string path, string contents)
     {
+        Path = path;
         _contents = contents;
     }
 }

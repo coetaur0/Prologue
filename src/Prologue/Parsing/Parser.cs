@@ -3,7 +3,7 @@ namespace Prologue.Parsing;
 /// <summary>
 /// A Prolog parser.
 /// </summary>
-public sealed class Parser
+internal sealed class Parser
 {
     /// <summary>
     /// The source being parsed.
@@ -40,36 +40,42 @@ public sealed class Parser
     }
 
     /// <summary>
-    /// Parses a Prolog program.
+    /// Parses a Prolog knowledge base.
     /// </summary>
-    public (KnowledgeBase, List<Diagnostic>) ParseProgram()
+    public KnowledgeBase ParseKnowledgeBase()
     {
-        var program = new KnowledgeBase();
+        var knowledgeBase = new KnowledgeBase();
 
         var syncTokens = new[] { TokenKind.Symbol };
         while (_nextToken.Kind != TokenKind.Eof)
         {
             var clause = ParseClause();
             if (clause is not null)
-                program.Add(clause);
+                knowledgeBase.Add(clause);
 
             Synchronize(syncTokens);
         }
 
-        return (program, _diagnostics);
+        if (_diagnostics.Count != 0)
+            throw new ParsingException(WriteDiagnostics());
+
+        return knowledgeBase;
     }
 
     /// <summary>
     /// Parses a Prolog query.
     /// </summary>
-    public (Query, List<Diagnostic>) ParseQuery()
+    public Query ParseQuery()
     {
         var goals = new List<Structure>();
         ParseTermList(goals, ParseStructure, new Dictionary<string, Variable>(), TokenKind.Period);
 
         Consume(TokenKind.Period, "expect a '.' at the end of a query");
 
-        return (new Query(goals.ToArray()), _diagnostics);
+        if (_diagnostics.Count != 0)
+            throw new ParsingException(WriteDiagnostics());
+
+        return new Query(goals.ToArray());
     }
 
     /// <summary>
@@ -179,7 +185,7 @@ public sealed class Parser
     }
 
     /// <summary>
-    /// Advances the parser's position in the source being parsed.
+    /// Advances the parser's position in the source.
     /// </summary>
     private Token Advance()
     {
@@ -192,7 +198,7 @@ public sealed class Parser
     }
 
     /// <summary>
-    /// Emits a new compiler diagnostic with some given error message and range if the parser isn't in panic mode.
+    /// Emits a new compiler diagnostic with some given error message and range, if the parser isn't in panic mode.
     /// </summary>
     private void EmitDiagnostic(string message, Range range)
     {
@@ -229,4 +235,13 @@ public sealed class Parser
 
         _panicMode = false;
     }
+
+    /// <summary>
+    /// Returns a string representation of the diagnostics emitted by the parser.
+    /// </summary>
+    private string WriteDiagnostics() =>
+        _diagnostics.Aggregate(
+            $"Syntax errors in {_source.Path}:",
+            (diags, diagnostic) => $"{diags}\n\t- {diagnostic}"
+        );
 }

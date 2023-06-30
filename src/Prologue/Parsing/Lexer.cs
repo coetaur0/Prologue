@@ -3,7 +3,7 @@ namespace Prologue.Parsing;
 /// <summary>
 /// A lexical analyser.
 /// </summary>
-public sealed class Lexer
+internal sealed class Lexer
 {
     /// <summary>
     /// The source being lexed.
