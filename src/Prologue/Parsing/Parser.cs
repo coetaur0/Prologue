@@ -57,7 +57,7 @@ internal sealed class Parser
         }
 
         if (_diagnostics.Count != 0)
-            throw new ParsingException(WriteDiagnostics());
+            throw new SyntaxException(WriteDiagnostics());
 
         return knowledgeBase;
     }
@@ -73,7 +73,7 @@ internal sealed class Parser
         Consume(TokenKind.Period, "expect a '.' at the end of a query");
 
         if (_diagnostics.Count != 0)
-            throw new ParsingException(WriteDiagnostics());
+            throw new SyntaxException(WriteDiagnostics());
 
         return new Query(goals.ToArray());
     }

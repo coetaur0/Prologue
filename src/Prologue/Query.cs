@@ -5,13 +5,17 @@ namespace Prologue;
 /// <summary>
 /// A Prolog query.
 /// </summary>
-/// <param name="Goals">The query's goals.</param>
 public sealed record Query(Structure[] Goals)
 {
     /// <summary>
+    /// Returns the set of variables in the query.
+    /// </summary>
+    public IEnumerable<Variable> Variables => Goals.SelectMany(goal => goal.Variables).ToHashSet();
+
+    /// <summary>
     /// Loads a query from a string and returns it.
     /// </summary>
-    public static Query FromString(string input)
+    public static Query Load(string input)
     {
         var source = new Source("input", input);
         var parser = new Parser(source);

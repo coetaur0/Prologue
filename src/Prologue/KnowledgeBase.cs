@@ -25,7 +25,7 @@ public sealed class KnowledgeBase
     /// <summary>
     /// Loads a knowledge base from a string and returns it.
     /// </summary>
-    public static KnowledgeBase FromString(string input)
+    public static KnowledgeBase Load(string input)
     {
         var source = new Source("input", input);
         var parser = new Parser(source);

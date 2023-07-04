@@ -8,7 +8,7 @@ public class ParsingTests
     public void LoadValidKnowledgeBase()
     {
         var knowledgeBase =
-            KnowledgeBase.FromString("a.\nb.\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).");
+            KnowledgeBase.Load("a.\nb.\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).");
 
         Assert.Equal(
             "a.\n\nb.\n\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).\n\n",
@@ -23,8 +23,8 @@ public class ParsingTests
     [Fact]
     public void LoadInvalidKnowledgeBase()
     {
-        var exception = Assert.Throws<ParsingException>(
-            () => KnowledgeBase.FromString(".\nok(a, b.\nok(X, Y) :- ok(X, Z), Z.\nok(X, Y) :- ok(X, Z), ok(Z, Y)")
+        var exception = Assert.Throws<SyntaxException>(
+            () => KnowledgeBase.Load(".\nok(a, b.\nok(X, Y) :- ok(X, Z), Z.\nok(X, Y) :- ok(X, Z), ok(Z, Y)")
         );
 
         const string message = "Syntax errors in input:\n" +
@@ -39,7 +39,7 @@ public class ParsingTests
     [Fact]
     public void LoadValidQuery()
     {
-        var query = Query.FromString("equal(X, Y), equal(Y, s(a, b)).");
+        var query = Query.Load("equal(X, Y), equal(Y, s(a, b)).");
 
         Assert.Equal("?- equal(X, Y), equal(Y, s(a, b)).", query.ToString());
 
@@ -50,7 +50,7 @@ public class ParsingTests
     [Fact]
     public void LoadInvalidQuery()
     {
-        var exception = Assert.Throws<ParsingException>(() => Query.FromString("X, equal(,Y), s(a, b"));
+        var exception = Assert.Throws<SyntaxException>(() => Query.Load("X, equal(,Y), s(a, b"));
 
         const string message = "Syntax errors in input:\n" +
                                "\t- 1:1..1:2: expect a symbol.\n" +

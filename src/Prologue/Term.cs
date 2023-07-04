@@ -1,6 +1,4 @@
-﻿using Prologue.Resolution;
-
-namespace Prologue;
+﻿namespace Prologue;
 
 /// <summary>
 /// A Prolog term.
@@ -8,12 +6,14 @@ namespace Prologue;
 public abstract class Term
 {
     /// <summary>
-    /// Performs unification between the term and another one and returns their most general unifier if it succeeds, or
-    /// null otherwise.
+    /// Applies a substitution to the term.
     /// </summary>
-    public Substitution? Unify(Term other)
-    {
-        var substitution = new Substitution();
-        return Solver.Unify(this, other, substitution) ? substitution : null;
-    }
+    /// <returns>The new term obtained after applying the substitution to the variables in the original term.</returns>
+    public abstract Term Apply(IDictionary<Variable, Term> substitution);
+
+    /// <summary>
+    /// Unifies the term with another one and records their most general unifier in a substitution.
+    /// </summary>
+    /// <returns>True if the terms unify, false otherwise.</returns>
+    public abstract bool Unify(Term other, IDictionary<Variable, Term> substitution);
 }

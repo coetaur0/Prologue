@@ -3,8 +3,6 @@ namespace Prologue;
 /// <summary>
 /// A Prolog definite clause.
 /// </summary>
-/// <param name="Head">The clause's head.</param>
-/// <param name="Body">The clause's body.</param>
 public sealed record Clause(Structure Head, Structure[] Body)
 {
     /// <summary>

@@ -1,19 +1,19 @@
 namespace Prologue.Parsing;
 
 /// <summary>
-/// An exception thrown when errors are encountered while parsing a source.
+/// An exception thrown when syntax errors are encountered while parsing a source.
 /// </summary>
-public sealed class ParsingException : Exception
+public sealed class SyntaxException : Exception
 {
-    public ParsingException()
+    public SyntaxException()
     {
     }
 
-    public ParsingException(string message) : base(message)
+    public SyntaxException(string message) : base(message)
     {
     }
 
-    public ParsingException(string message, Exception inner) : base(message, inner)
+    public SyntaxException(string message, Exception inner) : base(message, inner)
     {
     }
 }
