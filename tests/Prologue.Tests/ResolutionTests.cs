@@ -27,15 +27,15 @@ public class ResolutionTests
             }
         );
 
-        var substitution = new Dictionary<Variable, Term>();
+        var substitution = new Dictionary<string, Term>();
         lhs.Unify(rhs, substitution);
 
         Assert.NotNull(substitution);
 
-        Assert.Equal("f(a)", substitution[x].ToString());
-        Assert.Equal("f(f(a))", substitution[y].ToString());
-        Assert.Equal("f(a)", substitution[w].ToString());
-        Assert.Equal("f(f(a))", substitution[z].ToString());
+        Assert.Equal("f(a)", substitution["X"].ToString());
+        Assert.Equal("f(f(a))", substitution["Y"].ToString());
+        Assert.Equal("f(a)", substitution["W"].ToString());
+        Assert.Equal("f(f(a))", substitution["Z"].ToString());
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class ResolutionTests
             new Term[] { x, new Structure("h", new Term[] { new Structure("a", Array.Empty<Term>()), y }), x }
         );
 
-        var substitution = new Dictionary<Variable, Term>();
+        var substitution = new Dictionary<string, Term>();
 
         Assert.False(lhs.Unify(rhs, substitution));
     }

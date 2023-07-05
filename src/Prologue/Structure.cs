@@ -3,7 +3,7 @@
 /// <summary>
 /// A Prolog structure.
 /// </summary>
-public sealed class Structure : Term
+public sealed record Structure : Term
 {
     /// <summary>
     /// The structure's functor.
@@ -18,7 +18,7 @@ public sealed class Structure : Term
     /// <summary>
     /// Returns the set of variables in the structure.
     /// </summary>
-    public IEnumerable<Variable> Variables => Arguments.OfType<Variable>().ToHashSet();
+    public IEnumerable<Variable> Variables { get; }
 
     /// <summary>
     /// Indicates if the structure is ground or not.
@@ -29,10 +29,11 @@ public sealed class Structure : Term
     {
         Functor = new Functor(symbol, arguments.Length);
         Arguments = arguments;
-        Ground = Arguments.All(arg => arg switch { Structure structure => structure.Ground, _ => false });
+        Variables = arguments.OfType<Variable>().ToHashSet();
+        Ground = arguments.All(arg => arg switch { Structure structure => structure.Ground, _ => false });
     }
 
-    public override Term Apply(IDictionary<Variable, Term> substitution) => Ground
+    public override Term Apply(IDictionary<string, Term> substitution) => Ground
         ? this
         : new Structure(Functor.Symbol, Arguments.Select(arg => arg.Apply(substitution)).ToArray());
 
@@ -45,7 +46,7 @@ public sealed class Structure : Term
         return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : Functor.Symbol;
     }
 
-    public override bool Unify(Term other, IDictionary<Variable, Term> substitution)
+    public override bool Unify(Term other, IDictionary<string, Term> substitution)
     {
         if (this == other)
             return true;
@@ -57,7 +58,8 @@ public sealed class Structure : Term
                     return false;
 
                 for (var i = 0; i < Arguments.Length; i++)
-                    if (!Arguments[i].Apply(substitution)
+                    if (!Arguments[i]
+                            .Apply(substitution)
                             .Unify(structure.Arguments[i].Apply(substitution), substitution))
                         return false;
 
@@ -67,7 +69,7 @@ public sealed class Structure : Term
                 break;
 
             case Variable variable:
-                substitution.Add(variable, Apply(substitution));
+                substitution.Add(variable.Name, Apply(substitution));
                 break;
         }
 

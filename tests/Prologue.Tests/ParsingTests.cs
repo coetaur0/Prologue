@@ -14,10 +14,6 @@ public class ParsingTests
             "a.\n\nb.\n\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).\n\n",
             knowledgeBase.ToString()
         );
-
-        // Check that the two instances of variable Z in the body of predicate equal's third clause are the same.
-        var functor = new Functor("equal", 2);
-        Assert.Equal(knowledgeBase[functor][2].Body[0].Arguments[1], knowledgeBase[functor][2].Body[1].Arguments[0]);
     }
 
     [Fact]
@@ -42,9 +38,6 @@ public class ParsingTests
         var query = Query.Load("equal(X, Y), equal(Y, s(a, b)).");
 
         Assert.Equal("?- equal(X, Y), equal(Y, s(a, b)).", query.ToString());
-
-        // Check that the two instances of variable Y in the query are the same.
-        Assert.Equal(query.Goals[0].Arguments[1], query.Goals[1].Arguments[0]);
     }
 
     [Fact]

@@ -68,7 +68,7 @@ internal sealed class Parser
     public Query ParseQuery()
     {
         var goals = new List<Structure>();
-        ParseTermList(goals, ParseStructure, new Dictionary<string, Variable>(), TokenKind.Period);
+        ParseTermList(goals, ParseStructure, TokenKind.Period);
 
         Consume(TokenKind.Period, "expect a '.' at the end of a query");
 
@@ -83,9 +83,7 @@ internal sealed class Parser
     /// </summary>
     private Clause? ParseClause()
     {
-        var variables = new Dictionary<string, Variable>();
-
-        var head = ParseStructure(variables);
+        var head = ParseStructure();
         if (head is null)
             return null;
 
@@ -93,7 +91,7 @@ internal sealed class Parser
         if (_nextToken.Kind == TokenKind.Neck)
         {
             Advance();
-            ParseTermList(body, ParseStructure, variables, TokenKind.Period);
+            ParseTermList(body, ParseStructure, TokenKind.Period);
         }
 
         Consume(TokenKind.Period, "expect a '.' at the end of a clause");
@@ -104,15 +102,15 @@ internal sealed class Parser
     /// <summary>
     /// Parses a Prolog term.
     /// </summary>
-    private Term? ParseTerm(IDictionary<string, Variable> variables)
+    private Term? ParseTerm()
     {
         switch (_nextToken.Kind)
         {
             case TokenKind.Symbol:
-                return ParseStructure(variables);
+                return ParseStructure();
 
             case TokenKind.Variable:
-                return ParseVariable(variables);
+                return ParseVariable();
 
             default:
                 EmitDiagnostic("expect a Prolog term", _nextToken.Range);
@@ -123,7 +121,7 @@ internal sealed class Parser
     /// <summary>
     /// Parses a Prolog structure.
     /// </summary>
-    private Structure? ParseStructure(IDictionary<string, Variable> variables)
+    private Structure? ParseStructure()
     {
         var symbolToken = Consume(TokenKind.Symbol, "expect a symbol");
         if (symbolToken is null)
@@ -133,7 +131,7 @@ internal sealed class Parser
         if (_nextToken.Kind == TokenKind.LeftParen)
         {
             Advance();
-            ParseTermList(arguments, ParseTerm, variables, TokenKind.RightParen);
+            ParseTermList(arguments, ParseTerm, TokenKind.RightParen);
             Consume(TokenKind.RightParen, "expect a ')' at the end of a structure's arguments list");
         }
 
@@ -143,35 +141,24 @@ internal sealed class Parser
     /// <summary>
     /// Parses a Prolog variable.
     /// </summary>
-    private Variable? ParseVariable(IDictionary<string, Variable> variables)
+    private Variable? ParseVariable()
     {
         var variableToken = Consume(TokenKind.Variable, "expect a variable");
         if (variableToken is null)
             return null;
 
-        var variableName = _source[variableToken.Range];
-        if (variables.TryGetValue(variableName, out var variable))
-            return variable;
-
-        variable = new Variable(variableName);
-        variables.Add(variableName, variable);
-        return variable;
+        return new Variable(_source[variableToken.Range]);
     }
 
     /// <summary>
     /// Parses a comma separated list of terms ending with some specific terminator and returns it.
     /// </summary>
-    private void ParseTermList<T>(
-        ICollection<T> terms,
-        Func<IDictionary<string, Variable>, T?> parseFunction,
-        IDictionary<string, Variable> variables,
-        TokenKind terminator
-    )
+    private void ParseTermList<T>(ICollection<T> terms, Func<T?> parseFunction, TokenKind terminator)
     {
         var syncTokens = new[] { TokenKind.Comma, terminator };
         while (_nextToken.Kind != terminator)
         {
-            var term = parseFunction(variables);
+            var term = parseFunction();
             if (term is not null)
                 terms.Add(term);
 

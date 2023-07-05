@@ -5,12 +5,23 @@ namespace Prologue;
 /// <summary>
 /// A Prolog query.
 /// </summary>
-public sealed record Query(Structure[] Goals)
+public sealed record Query
 {
+    /// <summary>
+    /// The query's goals.
+    /// </summary>
+    public Structure[] Goals { get; }
+
     /// <summary>
     /// Returns the set of variables in the query.
     /// </summary>
-    public IEnumerable<Variable> Variables => Goals.SelectMany(goal => goal.Variables).ToHashSet();
+    public IEnumerable<Variable> Variables { get; }
+
+    public Query(Structure[] goals)
+    {
+        Goals = goals;
+        Variables = goals.SelectMany(goal => goal.Variables).ToHashSet();
+    }
 
     /// <summary>
     /// Loads a query from a string and returns it.
