@@ -3,6 +3,34 @@ namespace Prologue.Tests;
 public class ResolutionTests
 {
     [Fact]
+    public void SolveQueries()
+    {
+        var knowledgeBase = KnowledgeBase.Load(
+            "parent(tom, lucy).\n" +
+            "parent(laura, lucy).\n" +
+            "parent(lucy, james).\n" +
+            "parent(james, anne).\n" +
+            "ancestor(X, Y) :- parent(X, Y).\n" +
+            "ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y)."
+        );
+
+        var query = Query.Load("ancestor(X, anne).");
+
+        var solutions = knowledgeBase.Solve(query).ToArray();
+
+        Assert.Equal(4, solutions.Length);
+
+        Assert.Equal("james", solutions[0]["X"].ToString());
+        Assert.Equal("tom", solutions[1]["X"].ToString());
+        Assert.Equal("laura", solutions[2]["X"].ToString());
+        Assert.Equal("lucy", solutions[3]["X"].ToString());
+        
+        Assert.Equal(9, knowledgeBase.Solve(Query.Load("ancestor(X, Y).")).ToArray().Length);
+        
+        Assert.Empty(knowledgeBase.Solve(Query.Load("ancestor(X, tom).")).ToArray());
+    }
+
+    [Fact]
     public void UnifyTerms()
     {
         var w = new Variable("W");
@@ -28,9 +56,8 @@ public class ResolutionTests
         );
 
         var substitution = new Dictionary<string, Term>();
-        lhs.Unify(rhs, substitution);
 
-        Assert.NotNull(substitution);
+        Assert.True(lhs.Unify(rhs, substitution));
 
         Assert.Equal("f(a)", substitution["X"].ToString());
         Assert.Equal("f(f(a))", substitution["Y"].ToString());

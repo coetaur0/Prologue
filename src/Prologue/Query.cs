@@ -13,14 +13,15 @@ public sealed record Query
     public Structure[] Goals { get; }
 
     /// <summary>
-    /// Returns the set of variables in the query.
+    /// Returns the set of variable names appearing in the query.
     /// </summary>
-    public IEnumerable<Variable> Variables { get; }
+    public HashSet<string> Variables { get; }
 
     public Query(Structure[] goals)
     {
         Goals = goals;
-        Variables = goals.SelectMany(goal => goal.Variables).ToHashSet();
+        Variables =
+            Goals.Aggregate(new HashSet<string>(), (set, structure) => set.Union(structure.Variables).ToHashSet());
     }
 
     /// <summary>

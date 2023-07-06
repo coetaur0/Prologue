@@ -38,9 +38,6 @@ internal sealed class Source
     /// </summary>
     public int Length => _contents.Length;
 
-    /// <summary>
-    /// The source's contents.
-    /// </summary>
     private readonly string _contents;
 
     public Source(string path, string contents)

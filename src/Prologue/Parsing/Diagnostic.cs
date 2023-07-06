@@ -1,10 +1,10 @@
 namespace Prologue.Parsing;
 
 /// <summary>
-/// A compiler diagnostic.
+/// A parser diagnostic.
 /// </summary>
-/// <param name="Message">The diagnostic's message.</param>
-/// <param name="Range">The range covered by the diagnostic in the source.</param>
+/// <param name="Message">The diagnostic message.</param>
+/// <param name="Range">The range of the diagnostic in the source.</param>
 internal sealed record Diagnostic(string Message, Range Range)
 {
     /// <summary>

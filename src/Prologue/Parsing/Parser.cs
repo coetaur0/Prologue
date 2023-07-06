@@ -144,10 +144,7 @@ internal sealed class Parser
     private Variable? ParseVariable()
     {
         var variableToken = Consume(TokenKind.Variable, "expect a variable");
-        if (variableToken is null)
-            return null;
-
-        return new Variable(_source[variableToken.Range]);
+        return variableToken is null ? null : new Variable(_source[variableToken.Range]);
     }
 
     /// <summary>

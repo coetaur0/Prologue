@@ -6,14 +6,25 @@
 public abstract record Term
 {
     /// <summary>
+    /// Returns the set of variables names appearing in the term.
+    /// </summary>
+    public abstract HashSet<string> Variables { get; }
+
+    /// <summary>
     /// Applies a substitution to the term.
     /// </summary>
-    /// <returns>The new term obtained after applying the substitution to the variables in the original term.</returns>
+    /// <returns>The new term obtained after applying the substitution to its variables.</returns>
     public abstract Term Apply(IDictionary<string, Term> substitution);
 
     /// <summary>
-    /// Unifies the term with another one and records their most general unifier in a substitution.
+    /// Unifies the term with another one and extends the input substitution with their most general unifier.
     /// </summary>
     /// <returns>True if the terms unify, false otherwise.</returns>
     public abstract bool Unify(Term other, IDictionary<string, Term> substitution);
+
+    /// <summary>
+    /// Renames the variables in the term by appending their names with some index. 
+    /// </summary>
+    /// <returns>The new term obtained after renaming its variables.</returns>
+    internal abstract Term Rename(int index);
 }

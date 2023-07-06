@@ -16,42 +16,34 @@ public sealed record Structure : Term
     public Term[] Arguments { get; }
 
     /// <summary>
-    /// Returns the set of variables in the structure.
+    /// Indicates if the structure is ground (it doesn't contain any variables).
     /// </summary>
-    public IEnumerable<Variable> Variables { get; }
+    public bool Ground { get; }
 
-    /// <summary>
-    /// Indicates if the structure is ground or not.
-    /// </summary>
-    private bool Ground { get; }
+    public override HashSet<string> Variables { get; }
 
     public Structure(string symbol, Term[] arguments)
     {
         Functor = new Functor(symbol, arguments.Length);
         Arguments = arguments;
-        Variables = arguments.OfType<Variable>().ToHashSet();
-        Ground = arguments.All(arg => arg switch { Structure structure => structure.Ground, _ => false });
+        Variables = Arguments.Aggregate(new HashSet<string>(), (set, term) => set.Union(term.Variables).ToHashSet());
+        Ground = !Variables.Any();
     }
-
-    public override Term Apply(IDictionary<string, Term> substitution) => Ground
-        ? this
-        : new Structure(Functor.Symbol, Arguments.Select(arg => arg.Apply(substitution)).ToArray());
 
     /// <summary>
-    /// Returns a string representation of the structure.
+    /// Applies a substitution to the structure.
     /// </summary>
-    public override string ToString()
-    {
-        var args = Arguments.Aggregate("", (args, term) => $"{args}{term}, ");
-        return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : Functor.Symbol;
-    }
+    /// <returns>The new structure obtained after substituting its variables.</returns>
+    public override Structure Apply(IDictionary<string, Term> substitution) => Ground
+        ? this
+        : new(Functor.Symbol, Arguments.Select(argument => argument.Apply(substitution)).ToArray());
 
     public override bool Unify(Term other, IDictionary<string, Term> substitution)
     {
         if (this == other)
             return true;
 
-        switch (other.Apply(substitution))
+        switch (other)
         {
             case Structure structure:
                 if (Functor != structure.Functor)
@@ -69,10 +61,26 @@ public sealed record Structure : Term
                 break;
 
             case Variable variable:
-                substitution.Add(variable.Name, Apply(substitution));
+                substitution[variable.Name] = Apply(substitution);
                 break;
         }
 
         return true;
     }
+
+    /// <summary>
+    /// Returns a string representation of the structure.
+    /// </summary>
+    public override string ToString()
+    {
+        var args = Arguments.Aggregate("", (args, term) => $"{args}{term}, ");
+        return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : Functor.Symbol;
+    }
+
+    /// <summary>
+    /// Renames all the variables in the structure by appending their identifiers with some index.
+    /// </summary>
+    /// <returns>A new structure where all variables have been renamed.</returns>
+    internal override Structure Rename(int index) =>
+        new(Functor.Symbol, Arguments.Select(argument => argument.Rename(index)).ToArray());
 }

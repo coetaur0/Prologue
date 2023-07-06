@@ -20,5 +20,5 @@ internal enum TokenKind
 /// A lexical token.
 /// </summary>
 /// <param name="Kind">The token's kind.</param>
-/// <param name="Range">The source range covered by the token.</param>
+/// <param name="Range">The token's source range.</param>
 internal sealed record Token(TokenKind Kind, Range Range);

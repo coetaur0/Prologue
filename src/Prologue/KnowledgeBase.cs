@@ -12,9 +12,6 @@ public sealed class KnowledgeBase
     /// </summary>
     public List<Clause> this[Functor functor] => _predicates[functor];
 
-    /// <summary>
-    /// The knowledge base's predicates (or procedures).
-    /// </summary>
     private readonly Dictionary<Functor, List<Clause>> _predicates;
 
     public KnowledgeBase()
@@ -44,6 +41,26 @@ public sealed class KnowledgeBase
     }
 
     /// <summary>
+    /// Solves a query, given the knowledge base's predicates.
+    /// </summary>
+    /// <returns>The sequence of solution substitutions for the query's variables.</returns>
+    public IEnumerable<IDictionary<string, Term>> Solve(Query query)
+    {
+        if (query.Goals.Length == 0)
+            yield break;
+
+        var resolvent = query.Goals.Select(goal => goal.Rename(0)).ToArray();
+
+        foreach (var substitution in Prove(resolvent, new Dictionary<string, Term>(), 1))
+        {
+            var solution =
+                query.Variables.ToDictionary(variable => variable, variable => substitution[$"{variable}_0"]);
+
+            yield return solution;
+        }
+    }
+
+    /// <summary>
     /// Returns a string representation of the knowledge base.
     /// </summary>
     public override string ToString()
@@ -54,5 +71,36 @@ public sealed class KnowledgeBase
             predicates = $"{predicates}{clauses.Aggregate("", (predicate, clause) => $"{predicate}{clause}\n")}\n";
 
         return predicates;
+    }
+
+    /// <summary>
+    /// Proves a sequence of goals (the resolvent) given the knowledge base's predicates and a substitution.
+    /// </summary>
+    /// <returns>The sequence of solution substitutions for the resolvent.</returns>
+    private IEnumerable<IDictionary<string, Term>> Prove(
+        IReadOnlyCollection<Structure> resolvent,
+        IDictionary<string, Term> substitution,
+        int level
+    )
+    {
+        if (resolvent.Count == 0)
+        {
+            yield return substitution;
+            yield break;
+        }
+
+        var goal = resolvent.First();
+
+        foreach (var clause in _predicates[goal.Functor].Select(clause => clause.Rename(level)))
+        {
+            var newSubstitution = new Dictionary<string, Term>(substitution);
+
+            if (!goal.Unify(clause.Head, newSubstitution))
+                continue;
+
+            var newResolvent = clause.Body.Concat(resolvent.Skip(1)).ToArray();
+            foreach (var solution in Prove(newResolvent, newSubstitution, level + 1))
+                yield return solution;
+        }
     }
 }
