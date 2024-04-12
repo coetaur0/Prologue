@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prologue", "src\Prologue\Pr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prologue.Tests", "tests\Prologue.Tests\Prologue.Tests.csproj", "{068BD1B4-27E7-4108-9E9E-A17B13CE3951}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLI", "src\CLI\CLI.csproj", "{E5C0EECB-140F-4431-813B-97C59F386187}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{068BD1B4-27E7-4108-9E9E-A17B13CE3951}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{068BD1B4-27E7-4108-9E9E-A17B13CE3951}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{068BD1B4-27E7-4108-9E9E-A17B13CE3951}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5C0EECB-140F-4431-813B-97C59F386187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5C0EECB-140F-4431-813B-97C59F386187}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5C0EECB-140F-4431-813B-97C59F386187}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5C0EECB-140F-4431-813B-97C59F386187}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

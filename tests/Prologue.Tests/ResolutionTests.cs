@@ -5,7 +5,7 @@ public class ResolutionTests
     [Fact]
     public void SolveQueries()
     {
-        var knowledgeBase = KnowledgeBase.Load(
+        var knowledgeBase = KnowledgeBase.FromString(
             "parent(tom, lucy).\n" +
             "parent(laura, lucy).\n" +
             "parent(lucy, james).\n" +
@@ -24,10 +24,11 @@ public class ResolutionTests
         Assert.Equal("tom", solutions[1]["X"].ToString());
         Assert.Equal("laura", solutions[2]["X"].ToString());
         Assert.Equal("lucy", solutions[3]["X"].ToString());
-        
+
         Assert.Equal(9, knowledgeBase.Solve(Query.Load("ancestor(X, Y).")).ToArray().Length);
-        
+
         Assert.Empty(knowledgeBase.Solve(Query.Load("ancestor(X, tom).")).ToArray());
+        Assert.Empty(knowledgeBase.Solve(Query.Load("a.")).ToArray());
     }
 
     [Fact]

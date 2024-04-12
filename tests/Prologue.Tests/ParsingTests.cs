@@ -8,7 +8,7 @@ public class ParsingTests
     public void LoadValidKnowledgeBase()
     {
         var knowledgeBase =
-            KnowledgeBase.Load("a.\nb.\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).");
+            KnowledgeBase.FromString("a.\nb.\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).");
 
         Assert.Equal(
             "a.\n\nb.\n\nequal(a, a).\nequal(b, b).\nequal(X, Y) :- equal(X, Z), equal(Z, Y).\n\n",
@@ -20,7 +20,7 @@ public class ParsingTests
     public void LoadInvalidKnowledgeBase()
     {
         var exception = Assert.Throws<SyntaxException>(
-            () => KnowledgeBase.Load(".\nok(a, b.\nok(X, Y) :- ok(X, Z), Z.\nok(X, Y) :- ok(X, Z), ok(Z, Y)")
+            () => KnowledgeBase.FromString(".\nok(a, b.\nok(X, Y) :- ok(X, Z), Z.\nok(X, Y) :- ok(X, Z), ok(Z, Y)")
         );
 
         const string message = "Syntax errors in input:\n" +

@@ -12,19 +12,25 @@ public sealed class KnowledgeBase
     /// </summary>
     public List<Clause> this[Functor functor] => _predicates[functor];
 
-    private readonly Dictionary<Functor, List<Clause>> _predicates;
-
-    public KnowledgeBase()
-    {
-        _predicates = new Dictionary<Functor, List<Clause>>();
-    }
+    private readonly Dictionary<Functor, List<Clause>> _predicates = new();
 
     /// <summary>
     /// Loads a knowledge base from a string and returns it.
     /// </summary>
-    public static KnowledgeBase Load(string input)
+    public static KnowledgeBase FromString(string input)
     {
         var source = new Source("input", input);
+        var parser = new Parser(source);
+        return parser.ParseKnowledgeBase();
+    }
+
+    /// <summary>
+    /// Loads a knowledge base from a file and returns it.
+    /// </summary>
+    public static KnowledgeBase FromFile(string path)
+    {
+        var input = System.IO.File.ReadAllText(path);
+        var source = new Source(path, input);
         var parser = new Parser(source);
         return parser.ParseKnowledgeBase();
     }
@@ -90,8 +96,10 @@ public sealed class KnowledgeBase
         }
 
         var goal = resolvent.First();
+        if (!_predicates.TryGetValue(goal.Functor, out var clauses))
+            yield break;
 
-        foreach (var clause in _predicates[goal.Functor].Select(clause => clause.Rename(level)))
+        foreach (var clause in clauses.Select(clause => clause.Rename(level)))
         {
             var newSubstitution = new Dictionary<string, Term>(substitution);
 
