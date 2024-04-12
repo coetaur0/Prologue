@@ -51,6 +51,13 @@ internal static class Program
                 {
                     var output = SolutionString(solution);
                     var outputLength = output.Length;
+                    if (output == "")
+                    {
+                        Console.WriteLine("true.");
+                        interrupted = true;
+                        break;
+                    }
+
                     Console.Write(output);
 
                     ConsoleKey action;
@@ -62,7 +69,7 @@ internal static class Program
                     }
 
                     if (action == ConsoleKey.Spacebar)
-                        Console.Write(";\n");
+                        Console.WriteLine(";");
                     else
                     {
                         Console.SetCursorPosition(outputLength, Console.CursorTop);
@@ -91,6 +98,6 @@ internal static class Program
     private static string SolutionString(IDictionary<string, Term> solution)
     {
         var result = solution.Aggregate("", (result, binding) => $"{result}{binding.Key} = {binding.Value}, ");
-        return result.Length == 0 ? "true" : result[..^2];
+        return result.Length == 0 ? "" : result[..^2];
     }
 }
