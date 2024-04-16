@@ -19,7 +19,25 @@ internal static class Program
     /// </summary>
     private static void Run(string path)
     {
-        // Try to load the knowledge base.
+        var knowledgeBase = LoadKnowledgeBase(path);
+        if (knowledgeBase == null)
+            return;
+
+        Console.Write("?- ");
+        var input = Console.ReadLine();
+        while (input != null)
+        {
+            HandleQuery(knowledgeBase, input);
+            Console.Write("?- ");
+            input = Console.ReadLine();
+        }
+    }
+
+    /// <summary>
+    /// Loads a knowledge base from a file and returns it, or returns null if it fails.
+    /// </summary>
+    private static KnowledgeBase? LoadKnowledgeBase(string path)
+    {
         KnowledgeBase knowledgeBase;
         try
         {
@@ -28,67 +46,66 @@ internal static class Program
         catch (SyntaxException e)
         {
             Console.WriteLine(e.Message);
-            return;
+            return null;
         }
         catch (Exception)
         {
             Console.WriteLine($"Invalid path {path}.");
-            return;
+            return null;
         }
 
-        // Handle user queries.
-        Console.Write("?- ");
-        var input = Console.ReadLine();
-        while (input != null)
+        return knowledgeBase;
+    }
+
+    /// <summary>
+    /// Translates some user input as a query and evaluates it against a knowledge base.
+    /// </summary>
+    private static void HandleQuery(KnowledgeBase knowledgeBase, string input)
+    {
+        try
         {
-            try
+            var query = Query.Load(input);
+            var solutions = knowledgeBase.Solve(query);
+
+            var interrupted = false;
+            foreach (var solution in solutions)
             {
-                var query = Query.Load(input);
-                var solutions = knowledgeBase.Solve(query);
-
-                var interrupted = false;
-                foreach (var solution in solutions)
+                var output = SolutionString(solution);
+                var outputLength = output.Length;
+                if (output == "")
                 {
-                    var output = SolutionString(solution);
-                    var outputLength = output.Length;
-                    if (output == "")
-                    {
-                        Console.WriteLine("true.");
-                        interrupted = true;
-                        break;
-                    }
-
-                    Console.Write(output);
-
-                    ConsoleKey action;
-                    while (true)
-                    {
-                        action = Console.ReadKey().Key;
-                        if (action is ConsoleKey.Spacebar or ConsoleKey.Enter)
-                            break;
-                    }
-
-                    if (action == ConsoleKey.Spacebar)
-                        Console.WriteLine(";");
-                    else
-                    {
-                        Console.SetCursorPosition(outputLength, Console.CursorTop);
-                        Console.WriteLine(".");
-                        interrupted = true;
-                        break;
-                    }
+                    Console.WriteLine("true.");
+                    interrupted = true;
+                    break;
                 }
 
-                if (!interrupted)
-                    Console.WriteLine("false.");
-            }
-            catch (SyntaxException e)
-            {
-                Console.WriteLine(e.Message);
+                Console.Write(output);
+
+                ConsoleKey action;
+                while (true)
+                {
+                    action = Console.ReadKey().Key;
+                    if (action is ConsoleKey.Spacebar or ConsoleKey.Enter)
+                        break;
+                }
+
+                if (action == ConsoleKey.Spacebar)
+                    Console.WriteLine(";");
+                else
+                {
+                    Console.SetCursorPosition(outputLength, Console.CursorTop);
+                    Console.WriteLine(".");
+                    interrupted = true;
+                    break;
+                }
             }
 
-            Console.Write("?- ");
-            input = Console.ReadLine();
+            if (!interrupted)
+                Console.WriteLine("false.");
+        }
+        catch (SyntaxException e)
+        {
+            Console.WriteLine(e.Message);
         }
     }
 
