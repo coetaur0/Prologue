@@ -51,7 +51,9 @@ internal sealed class Lexer
     public Token? Next()
     {
         if (_depleted)
+        {
             return null;
+        }
 
         SkipNonTokens();
         _tokenStart = new Location(_line, _column, _offset);
@@ -121,7 +123,9 @@ internal sealed class Lexer
     {
         for (var i = 0; i < offset; i++)
             if (_offset >= _source.Length)
+            {
                 return;
+            }
             else
             {
                 if (_source[_offset] == '\n')
@@ -130,7 +134,9 @@ internal sealed class Lexer
                     _column = 1;
                 }
                 else
+                {
                     _column++;
+                }
 
                 _offset++;
             }
@@ -149,7 +155,9 @@ internal sealed class Lexer
                 _column = 1;
             }
             else
+            {
                 _column++;
+            }
 
             _offset++;
         }
@@ -159,5 +167,5 @@ internal sealed class Lexer
     /// Returns a new token of a given type.
     /// </summary>
     private Token MakeToken(TokenKind tokenKind) =>
-        new(tokenKind, new(_tokenStart, new(_line, _column, _offset)));
+        new(tokenKind, new Range(_tokenStart, new Location(_line, _column, _offset)));
 }

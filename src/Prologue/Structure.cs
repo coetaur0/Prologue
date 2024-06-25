@@ -1,4 +1,6 @@
-﻿namespace Prologue;
+﻿using System.Text;
+
+namespace Prologue;
 
 /// <summary>
 /// A Prolog structure.
@@ -36,27 +38,34 @@ public sealed record Structure : Term
     /// <returns>The new structure obtained after substituting its variables.</returns>
     public override Structure Apply(IDictionary<string, Term> substitution) => Ground
         ? this
-        : new(Functor.Symbol, Arguments.Select(argument => argument.Apply(substitution)).ToArray());
+        : new Structure(Functor.Symbol, Arguments.Select(argument => argument.Apply(substitution)).ToArray());
 
     public override bool Unify(Term other, IDictionary<string, Term> substitution)
     {
         if (this == other)
+        {
             return true;
+        }
 
         switch (other)
         {
             case Structure structure:
                 if (Functor != structure.Functor)
+                {
                     return false;
+                }
 
-                for (var i = 0; i < Arguments.Length; i++)
-                    if (!Arguments[i]
-                            .Apply(substitution)
-                            .Unify(structure.Arguments[i].Apply(substitution), substitution))
-                        return false;
+                if (Arguments.Where((t, i) => !t
+                        .Apply(substitution)
+                        .Unify(structure.Arguments[i].Apply(substitution), substitution)).Any())
+                {
+                    return false;
+                }
 
                 foreach (var (variable, term) in substitution)
+                {
                     substitution[variable] = term.Apply(substitution);
+                }
 
                 break;
 
@@ -73,8 +82,22 @@ public sealed record Structure : Term
     /// </summary>
     public override string ToString()
     {
-        var args = Arguments.Aggregate("", (args, term) => $"{args}{term}, ");
-        return args.Length > 2 ? $"{Functor.Symbol}({args[..^2]})" : Functor.Symbol;
+        var str = new StringBuilder($"{Functor.Symbol}");
+
+        if (Arguments.Length == 0)
+        {
+            return str.ToString();
+        }
+
+        str.Append('(');
+        foreach (var argument in Arguments)
+        {
+            str.Append($"{argument}, ");
+        }
+
+        str.Remove(str.Length - 2, 2);
+        str.Append(')');
+        return str.ToString();
     }
 
     /// <summary>

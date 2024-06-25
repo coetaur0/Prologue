@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Prologue.Parsing;
 
 /// <summary>
@@ -51,13 +53,17 @@ internal sealed class Parser
         {
             var clause = ParseClause();
             if (clause is not null)
+            {
                 knowledgeBase.Add(clause);
+            }
 
             Synchronize(syncTokens);
         }
 
         if (_diagnostics.Count != 0)
+        {
             throw new SyntaxException(WriteDiagnostics());
+        }
 
         return knowledgeBase;
     }
@@ -73,7 +79,9 @@ internal sealed class Parser
         Consume(TokenKind.Period, "expect a '.' at the end of a query");
 
         if (_diagnostics.Count != 0)
+        {
             throw new SyntaxException(WriteDiagnostics());
+        }
 
         return new Query(goals.ToArray());
     }
@@ -85,7 +93,9 @@ internal sealed class Parser
     {
         var head = ParseStructure();
         if (head is null)
+        {
             return null;
+        }
 
         var body = new List<Structure>();
         if (_nextToken.Kind == TokenKind.Neck)
@@ -125,15 +135,19 @@ internal sealed class Parser
     {
         var symbolToken = Consume(TokenKind.Symbol, "expect a symbol");
         if (symbolToken is null)
+        {
             return null;
+        }
 
         var arguments = new List<Term>();
-        if (_nextToken.Kind == TokenKind.LeftParen)
+        if (_nextToken.Kind != TokenKind.LeftParen)
         {
-            Advance();
-            ParseTermList(arguments, ParseTerm, TokenKind.RightParen);
-            Consume(TokenKind.RightParen, "expect a ')' at the end of a structure's arguments list");
+            return new Structure(_source[symbolToken.Range], arguments.ToArray());
         }
+
+        Advance();
+        ParseTermList(arguments, ParseTerm, TokenKind.RightParen);
+        Consume(TokenKind.RightParen, "expect a ')' at the end of a structure's arguments list");
 
         return new Structure(_source[symbolToken.Range], arguments.ToArray());
     }
@@ -157,14 +171,20 @@ internal sealed class Parser
         {
             var term = parseFunction();
             if (term is not null)
+            {
                 terms.Add(term);
+            }
 
             Synchronize(syncTokens);
 
             if (_nextToken.Kind == TokenKind.Comma)
+            {
                 Advance();
+            }
             else
+            {
                 break;
+            }
         }
     }
 
@@ -176,7 +196,9 @@ internal sealed class Parser
         var token = _nextToken;
 
         if (_nextToken.Kind != TokenKind.Eof)
+        {
             _nextToken = _lexer.Next()!;
+        }
 
         return token;
     }
@@ -187,7 +209,9 @@ internal sealed class Parser
     private void EmitDiagnostic(string message, Range range)
     {
         if (_panicMode)
+        {
             return;
+        }
 
         _panicMode = true;
         _diagnostics.Add(new Diagnostic(message, range));
@@ -200,7 +224,9 @@ internal sealed class Parser
     private Token? Consume(TokenKind tokenKind, string message)
     {
         if (_nextToken.Kind == tokenKind)
+        {
             return Advance();
+        }
 
         EmitDiagnostic(message, _nextToken.Range);
         return null;
@@ -212,10 +238,14 @@ internal sealed class Parser
     private void Synchronize(TokenKind[] tokenKinds)
     {
         if (!_panicMode)
+        {
             return;
+        }
 
         while (_nextToken.Kind != TokenKind.Eof && !tokenKinds.Contains(_nextToken.Kind))
+        {
             Advance();
+        }
 
         _panicMode = false;
     }
@@ -223,9 +253,15 @@ internal sealed class Parser
     /// <summary>
     /// Returns a string representation of the diagnostics emitted by the parser.
     /// </summary>
-    private string WriteDiagnostics() =>
-        _diagnostics.Aggregate(
-            $"Syntax errors in {_source.Path}:",
-            (diags, diagnostic) => $"{diags}\n\t- {diagnostic}"
-        );
+    private string WriteDiagnostics()
+    {
+        var message = new StringBuilder($"Syntax errors in {_source.Path}:");
+
+        foreach (var diagnostic in _diagnostics)
+        {
+            message.Append($"\n\t- {diagnostic}");
+        }
+
+        return message.ToString();
+    }
 }

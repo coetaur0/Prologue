@@ -1,3 +1,4 @@
+using System.Text;
 using Prologue.Parsing;
 
 namespace Prologue;
@@ -39,7 +40,21 @@ public sealed record Query
     /// </summary>
     public override string ToString()
     {
-        var goals = Goals.Aggregate("", (goals, structure) => $"{goals}{structure}, ");
-        return goals.Length > 2 ? $"?- {goals[..^2]}." : "";
+        var str = new StringBuilder();
+
+        if (Goals.Length == 0)
+        {
+            return str.ToString();
+        }
+
+        str.Append("?- ");
+        foreach (var goal in Goals)
+        {
+            str.Append($"{goal}, ");
+        }
+
+        str.Remove(str.Length - 2, 2);
+        str.Append('.');
+        return str.ToString();
     }
 }

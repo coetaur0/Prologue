@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Prologue;
 
 /// <summary>
@@ -10,8 +12,23 @@ public sealed record Clause(Structure Head, Structure[] Body)
     /// </summary>
     public override string ToString()
     {
-        var body = Body.Aggregate("", (body, structure) => $"{body}{structure}, ");
-        return body.Length > 2 ? $"{Head} :- {body[..^2]}." : $"{Head}.";
+        var str = new StringBuilder($"{Head}");
+
+        if (Body.Length == 0)
+        {
+            str.Append('.');
+            return str.ToString();
+        }
+
+        str.Append(" :- ");
+        foreach (var structure in Body)
+        {
+            str.Append($"{structure}, ");
+        }
+
+        str.Remove(str.Length - 2, 2);
+        str.Append('.');
+        return str.ToString();
     }
 
     /// <summary>

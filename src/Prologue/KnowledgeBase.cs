@@ -41,9 +41,13 @@ public sealed class KnowledgeBase
     public void Add(Clause clause)
     {
         if (_predicates.TryGetValue(clause.Head.Functor, out var clauses))
+        {
             clauses.Add(clause);
+        }
         else
+        {
             _predicates[clause.Head.Functor] = new List<Clause> { clause };
+        }
     }
 
     /// <summary>
@@ -53,7 +57,9 @@ public sealed class KnowledgeBase
     public IEnumerable<IDictionary<string, Term>> Solve(Query query)
     {
         if (query.Goals.Length == 0)
+        {
             yield break;
+        }
 
         var resolvent = query.Goals.Select(goal => goal.Rename(0)).ToArray();
 
@@ -74,7 +80,9 @@ public sealed class KnowledgeBase
         var predicates = "";
 
         foreach (var (_, clauses) in _predicates)
+        {
             predicates = $"{predicates}{clauses.Aggregate("", (predicate, clause) => $"{predicate}{clause}\n")}\n";
+        }
 
         return predicates;
     }
@@ -97,18 +105,24 @@ public sealed class KnowledgeBase
 
         var goal = resolvent.First();
         if (!_predicates.TryGetValue(goal.Functor, out var clauses))
+        {
             yield break;
+        }
 
         foreach (var clause in clauses.Select(clause => clause.Rename(level)))
         {
             var newSubstitution = new Dictionary<string, Term>(substitution);
 
             if (!goal.Unify(clause.Head, newSubstitution))
+            {
                 continue;
+            }
 
             var newResolvent = clause.Body.Concat(resolvent.Skip(1)).ToArray();
             foreach (var solution in Prove(newResolvent, newSubstitution, level + 1))
+            {
                 yield return solution;
+            }
         }
     }
 }

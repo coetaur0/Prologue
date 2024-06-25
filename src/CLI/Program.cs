@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Text;
 using Prologue;
 using Prologue.Parsing;
 
@@ -21,7 +22,9 @@ internal static class Program
     {
         var knowledgeBase = LoadKnowledgeBase(path);
         if (knowledgeBase == null)
+        {
             return;
+        }
 
         Console.Write("?- ");
         var input = Console.ReadLine();
@@ -86,11 +89,15 @@ internal static class Program
                 {
                     action = Console.ReadKey().Key;
                     if (action is ConsoleKey.Spacebar or ConsoleKey.Enter)
+                    {
                         break;
+                    }
                 }
 
                 if (action == ConsoleKey.Spacebar)
+                {
                     Console.WriteLine(";");
+                }
                 else
                 {
                     Console.SetCursorPosition(outputLength, Console.CursorTop);
@@ -101,7 +108,9 @@ internal static class Program
             }
 
             if (!interrupted)
+            {
                 Console.WriteLine("false.");
+            }
         }
         catch (SyntaxException e)
         {
@@ -114,7 +123,19 @@ internal static class Program
     /// </summary>
     private static string SolutionString(IDictionary<string, Term> solution)
     {
-        var result = solution.Aggregate("", (result, binding) => $"{result}{binding.Key} = {binding.Value}, ");
-        return result.Length == 0 ? "" : result[..^2];
+        var str = new StringBuilder();
+
+        if (solution.Count == 0)
+        {
+            return str.ToString();
+        }
+
+        foreach (var binding in solution)
+        {
+            str.Append($"{binding.Key} = {binding.Value}, ");
+        }
+
+        str.Remove(str.Length - 2, 2);
+        return str.ToString();
     }
 }

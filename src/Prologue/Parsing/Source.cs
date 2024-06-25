@@ -3,17 +3,17 @@ namespace Prologue.Parsing;
 /// <summary>
 /// A source of Prolog code.
 /// </summary>
-internal sealed class Source
+internal sealed class Source(string path, string contents)
 {
     /// <summary>
     /// The source's path.
     /// </summary>
-    public string Path { get; }
+    public string Path { get; } = path;
 
     /// <summary>
     /// Returns the character at some offset in the source's contents.
     /// </summary>
-    public char this[int offset] => _contents[offset];
+    public char this[int offset] => contents[offset];
 
     /// <summary>
     /// Returns the contents covered by some range in the source.
@@ -27,22 +27,14 @@ internal sealed class Source
     {
         get
         {
-            var offset = Math.Max(0, Math.Min(start, _contents.Length));
-            var length = Math.Min(end, _contents.Length) - offset;
-            return _contents.Substring(offset, length);
+            var offset = Math.Max(0, Math.Min(start, contents.Length));
+            var length = Math.Min(end, contents.Length) - offset;
+            return contents.Substring(offset, length);
         }
     }
 
     /// <summary>
     /// Returns the source's length.
     /// </summary>
-    public int Length => _contents.Length;
-
-    private readonly string _contents;
-
-    public Source(string path, string contents)
-    {
-        Path = path;
-        _contents = contents;
-    }
+    public int Length => contents.Length;
 }
